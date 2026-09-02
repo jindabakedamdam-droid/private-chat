@@ -1133,14 +1133,16 @@ async function renderMessage(msg) {
 
   }
 
-  const time =
-    document.createElement("span");
+  
+  });
 
   time.className = "messageTime";
 
   time.textContent =
-    formatTime(msg.created_at);
-
+  new Date(msg.created_at).toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit"
+  });
   wrapper.appendChild(time);
 
   messages.appendChild(wrapper);

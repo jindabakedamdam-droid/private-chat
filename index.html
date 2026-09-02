@@ -1210,24 +1210,25 @@ async function sendMessage() {
   if (!currentUser ||
       !selectedUser ||
       !currentConversation) {
-
     return;
   }
 
-  const text =
-    messageInput.value.trim();
+  const text = messageInput.value.trim();
 
   if (!text) return;
 
-  messageInput.disabled = true
-const { error } =
+  messageInput.disabled = true;
+
+  const { data, error } =
     await supabaseClient
       .from("messages")
       .insert({
         conversation_id: currentConversation.id,
         sender_id: currentUser.id,
         text: text
-      });
+      })
+      .select()
+      .single();
 
   messageInput.disabled = false;
 
@@ -1235,9 +1236,11 @@ const { error } =
     alert("Message could not be sent: " + error.message);
     return;
   }
+messageInput.value = "";
+messageInput.focus();
 
-  messageInput.value = "";
-  messageInput.focus();
+  await loadMessages();
+  scrollMessages();
 }
 
 document.getElementById("sendBtn").addEventListener("click", sendMessage);

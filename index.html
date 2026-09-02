@@ -1251,6 +1251,7 @@ document.getElementById("photoBtn").addEventListener("click", () => {
 });
 
 photoInput.addEventListener("change", async event => {
+
   const file = event.target.files[0];
 
   if (!file) return;
@@ -1273,28 +1274,74 @@ photoInput.addEventListener("change", async event => {
   }
 
   const button = document.getElementById("photoBtn");
+
   button.disabled = true;
   button.textContent = "⏳";
 
   try {
+
     const ids = [currentUser.id, selectedUser.id].sort();
 
-    const extension = file.name.split(".").pop().toLowerCase();
+    const extension =
+      file.name.split(".").pop().toLowerCase();
 
     const filename =
-      Date.now() + "-" + crypto.randomUUID() + "." + extension;
+      Date.now() + "-" +
+      crypto.randomUUID() + "." +
+      extension;
 
     const path =
-      ids[0] + "/" + ids[1] + "/" + filename;
+      ids[0] + "/" +
+      ids[1] + "/" +
+      filename;
 
     const upload =
-      await supabaseClient.storage
+      await supabaseClient
+        .storage
         .from("chat-photos")
         .upload(path, file, {
           cacheControl: "3600",
           upsert: false,
           contentType: file.type
         });
+
+    if (upload.error) {
+      throw upload.error;
+    }
+
+    const { error: messageError } =
+      await supabaseClient
+        .from("messages")
+        .insert({
+          conversation_id: currentConversation.id,
+          sender_id: currentUser.id,
+          photo_path: path
+        });
+
+    if (messageError) {
+      throw messageError;
+    }
+
+    await loadMessages();
+
+  } catch (error) {
+
+    console.error("Photo send error:", error);
+
+    alert(
+      "Photo send nahi hui: " +
+      (error.message || "Unknown error")
+    );
+
+  } finally {
+
+    photoInput.value = "";
+    button.disabled = false;
+    button.textContent = "📷";
+
+  }
+
+});
 document.getElementById("backBtn").addEventListener("click", () => {
   appScreen.classList.remove("chatOpen");
   selectedUser = null;

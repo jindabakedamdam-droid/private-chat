@@ -1079,19 +1079,21 @@ async function renderMessage(msg) {
 
   wrapper.className =
     "message " +
-    (msg.sender_id === currentUser.id ? "mine" : "theirs");
+    (msg.sender_id === currentUser.id
+      ? "mine"
+      : "theirs");
 
-  /* TEXT */
   if (msg.text) {
+
     const text = document.createElement("div");
+
     text.textContent = msg.text;
+
     wrapper.appendChild(text);
   }
 
-  /* TIME */
-  const time = document.createElement("span");
-
-  time.className = "messageTime";
+  const time =
+    document.createElement("span");
 
   time.textContent =
     new Date(msg.created_at).toLocaleTimeString([], {
@@ -1099,18 +1101,17 @@ async function renderMessage(msg) {
       minute: "2-digit"
     });
 
-  wrapper.appendChild(time);
+  time.className = "messageTime";
 
-  /* ADD MESSAGE TO CHAT IMMEDIATELY */
-  messages.appendChild(wrapper);
-
-  /* PHOTO */
   if (msg.photo_path) {
 
-    const img = document.createElement("img");
+    const img =
+      document.createElement("img");
 
     img.className = "photo";
+
     img.alt = "Private photo";
+
     img.loading = "lazy";
 
     const { data, error } =
@@ -1139,9 +1140,11 @@ async function renderMessage(msg) {
       );
     }
   }
+
+  wrapper.appendChild(time);
+
+  messages.appendChild(wrapper);
 }
-
-
 /* ==============================
    REALTIME
 ============================== */

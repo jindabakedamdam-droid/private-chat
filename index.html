@@ -663,11 +663,14 @@ document
       "Creating account...";
 
     const { data, error } =
-      await supabaseClient.auth.signUp({
-        email,
-        password
-      });
-
+  await supabaseClient.auth.signUp({
+    email,
+    password,
+    options: {
+      emailRedirectTo:
+        "https://jindabakedamdam-droid.github.io/private-chat/"
+    }
+  });
     if (error) {
       authMessage.textContent =
         error.message;

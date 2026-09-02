@@ -1075,30 +1075,39 @@ async function loadMessages() {
 
 async function renderMessage(msg) {
 
-  const wrapper =
-    document.createElement("div");
+  const wrapper = document.createElement("div");
 
   wrapper.className =
     "message " +
-    (msg.sender_id === currentUser.id
-      ? "mine"
-      : "theirs");
+    (msg.sender_id === currentUser.id ? "mine" : "theirs");
 
+  /* TEXT */
   if (msg.text) {
-
-    const text =
-      document.createElement("div");
-
+    const text = document.createElement("div");
     text.textContent = msg.text;
-
     wrapper.appendChild(text);
-
   }
 
+  /* TIME */
+  const time = document.createElement("span");
+
+  time.className = "messageTime";
+
+  time.textContent =
+    new Date(msg.created_at).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+
+  wrapper.appendChild(time);
+
+  /* ADD MESSAGE TO CHAT IMMEDIATELY */
+  messages.appendChild(wrapper);
+
+  /* PHOTO */
   if (msg.photo_path) {
 
-    const img =
-      document.createElement("img");
+    const img = document.createElement("img");
 
     img.className = "photo";
     img.alt = "Private photo";
@@ -1117,35 +1126,19 @@ async function renderMessage(msg) {
 
       img.src = data.signedUrl;
 
-      img.addEventListener(
-        "click",
-        () => {
-          window.open(
-            data.signedUrl,
-            "_blank"
-          );
-        }
+      img.addEventListener("click", () => {
+        window.open(
+          data.signedUrl,
+          "_blank"
+        );
+      });
+
+      wrapper.insertBefore(
+        img,
+        time
       );
-
-      wrapper.appendChild(img);
-
     }
-
   }
-
-  
-  });
-
-  time.className = "messageTime";
-
-  time.textContent =
-  new Date(msg.created_at).toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit"
-  });
-  wrapper.appendChild(time);
-
-  messages.appendChild(wrapper);
 }
 
 

@@ -1217,3 +1217,144 @@ async function sendMessage() {
   if (!text) return;
 
   messageInput.disabled = true
+const { error } =
+    await supabaseClient
+      .from("messages")
+      .insert({
+        conversation_id: currentConversation.id,
+        sender_id: currentUser.id,
+        text: text
+      });
+
+  messageInput.disabled = false;
+
+  if (error) {
+    alert("Message could not be sent: " + error.message);
+    return;
+  }
+
+  messageInput.value = "";
+  messageInput.focus();
+}
+
+document.getElementById("sendBtn").addEventListener("click", sendMessage);
+messageInput.addEventListener("keydown", event => {
+  if (event.key === "Enter" && !event.shiftKey) {
+    event.preventDefault();
+    sendMessage();
+  }
+});
+
+document.getElementById("photoBtn").addEventListener("click", () => {
+  photoInput.click();
+});
+
+photoInput.addEventListener("change", async event => {
+  const file = event.target.files[0];
+
+  if (!file) return;
+
+  if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+    alert("Only JPG, PNG and WebP images are allowed.");
+    photoInput.value = "";
+    return;
+  }
+
+  if (file.size > 10 * 1024 * 1024) {
+    alert("Photo must be smaller than 10 MB.");
+    photoInput.value = "";
+    return;
+  }
+
+  if (!currentUser || !selectedUser || !currentConversation) {
+    photoInput.value = "";
+    return;
+  }
+
+  const button = document.getElementById("photoBtn");
+  button.disabled = true;
+  button.textContent = "⏳";
+
+  try {
+    const ids = [currentUser.id, selectedUser.id].sort();
+
+    const extension = file.name.split(".").pop().toLowerCase();
+
+    const filename =
+      Date.now() + "-" + crypto.randomUUID() + "." + extension;
+
+    const path =
+      ids[0] + "/" + ids[1] + "/" + filename;
+
+    const upload =
+      await supabaseClient.storage
+        .from("chat-photos")
+        .upload(path, file, {
+          cacheControl: "3600",
+          upsert: false,
+          contentType: file.type
+        });
+document.getElementById("backBtn").addEventListener("click", () => {
+  appScreen.classList.remove("chatOpen");
+  selectedUser = null;
+
+  if (messageChannel) {
+    supabaseClient.removeChannel(messageChannel);
+    messageChannel = null;
+  }
+});
+
+function scrollMessages() {
+  messages.scrollTop = messages.scrollHeight;
+}
+
+function formatTime(value) {
+  if (!value) return "";
+
+  return new Date(value).toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+}
+
+(async function() {
+  const { data } = await supabaseClient.auth.getSession();
+
+  if (data && data.session && data.session.user) {
+    currentUser = data.session.user;
+
+    authScreen.classList.add("hidden");
+    appScreen.classList.remove("hidden");
+
+    document.getElementById("currentEmail").textContent =
+      currentUser.email || "";
+
+    await loadUsers();
+  }
+})();
+
+    if (upload.error) throw upload.error;
+
+    const insert =
+      await supabaseClient
+        .from("messages")
+        .insert({
+          conversation_id: currentConversation.id,
+          sender_id: currentUser.id,
+          photo_path: path
+        });
+
+    if (insert.error) throw insert.error;
+
+  } catch (error) {
+    console.error(error);
+    alert("Photo upload failed: " + error.message);
+  }
+
+  button.disabled = false;
+  button.textContent = "📷";
+  photoInput.value = "";
+});
+</script>
+</body>
+</html>

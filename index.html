@@ -1,1052 +1,1219 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Private Chat</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Private Chat</title>
 
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    body {
-      font-family: Arial, sans-serif;
-      background: #0f1115;
-      color: #fff;
-      min-height: 100vh;
-    }
+<style>
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
 
-    button,
-    input {
-      font: inherit;
-    }
+body{
+  font-family:Arial,sans-serif;
+  background:#080b10;
+  color:#fff;
+  min-height:100vh;
+}
 
-    .hidden {
-      display: none !important;
-    }
+button,input{
+  font:inherit;
+}
 
-    .screen {
-      min-height: 100vh;
-    }
+button{
+  cursor:pointer;
+}
 
-    /* LOGIN */
+.hidden{
+  display:none!important;
+}
 
-    #authScreen {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-    }
+/* AUTH */
+#authScreen{
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:20px;
+}
 
-    .auth-box {
-      width: 100%;
-      max-width: 420px;
-      background: #181b22;
-      padding: 28px;
-      border-radius: 20px;
-      box-shadow: 0 10px 40px rgba(0,0,0,.35);
-    }
+.authBox{
+  width:100%;
+  max-width:420px;
+  background:#111722;
+  border:1px solid #202a3a;
+  border-radius:22px;
+  padding:28px;
+  box-shadow:0 15px 50px rgba(0,0,0,.45);
+}
 
-    .logo {
-      text-align: center;
-      font-size: 42px;
-      margin-bottom: 10px;
-    }
+.logo{
+  text-align:center;
+  font-size:32px;
+  font-weight:bold;
+  margin-bottom:8px;
+}
 
-    .auth-box h1 {
-      text-align: center;
-      margin-bottom: 8px;
-    }
+.subtitle{
+  text-align:center;
+  color:#8d99aa;
+  margin-bottom:25px;
+}
 
-    .subtitle {
-      text-align: center;
-      color: #9da3ae;
-      margin-bottom: 25px;
-    }
+.authBox h2{
+  margin-bottom:18px;
+}
 
-    .field {
-      margin-bottom: 14px;
-    }
+.input{
+  width:100%;
+  background:#0b1018;
+  border:1px solid #293448;
+  color:#fff;
+  padding:14px;
+  border-radius:12px;
+  outline:none;
+  margin-bottom:12px;
+}
 
-    .field label {
-      display: block;
-      margin-bottom: 7px;
-      color: #c8ccd4;
-      font-size: 14px;
-    }
+.input:focus{
+  border-color:#4da3ff;
+}
 
-    .field input {
-      width: 100%;
-      padding: 14px;
-      border: 1px solid #343945;
-      border-radius: 12px;
-      background: #101218;
-      color: #fff;
-      outline: none;
-    }
+.primary{
+  width:100%;
+  border:0;
+  background:#248cff;
+  color:white;
+  padding:14px;
+  border-radius:12px;
+  font-weight:bold;
+  margin-top:5px;
+}
 
-    .field input:focus {
-      border-color: #4d8dff;
-    }
+.secondary{
+  width:100%;
+  border:1px solid #334056;
+  background:#151c28;
+  color:#fff;
+  padding:13px;
+  border-radius:12px;
+  font-weight:bold;
+  margin-top:10px;
+}
 
-    .primary-btn {
-      width: 100%;
-      padding: 14px;
-      border: 0;
-      border-radius: 12px;
-      background: #3478f6;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-      margin-top: 8px;
-    }
+.authMessage{
+  min-height:22px;
+  margin-top:14px;
+  text-align:center;
+  color:#ffb4b4;
+  font-size:14px;
+}
 
-    .secondary-btn {
-      width: 100%;
-      padding: 13px;
-      border: 1px solid #3b404c;
-      border-radius: 12px;
-      background: transparent;
-      color: white;
-      cursor: pointer;
-      margin-top: 10px;
-    }
+/* APP */
+#appScreen{
+  min-height:100vh;
+  display:flex;
+}
 
-    .message {
-      margin-top: 15px;
-      text-align: center;
-      color: #ff8f8f;
-      font-size: 14px;
-      line-height: 1.5;
-    }
+.sidebar{
+  width:320px;
+  border-right:1px solid #202938;
+  background:#0d121b;
+  display:flex;
+  flex-direction:column;
+}
 
-    /* APP */
+.sideHeader{
+  padding:20px;
+  border-bottom:1px solid #202938;
+}
 
-    #appScreen {
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-    }
+.sideHeader h1{
+  font-size:23px;
+  margin-bottom:5px;
+}
 
-    .topbar {
-      height: 65px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 16px;
-      background: #181b22;
-      border-bottom: 1px solid #292d36;
-    }
+.userEmail{
+  color:#7f8b9e;
+  font-size:12px;
+  word-break:break-all;
+}
 
-    .topbar-title {
-      font-size: 20px;
-      font-weight: bold;
-    }
+.searchBox{
+  padding:14px;
+  border-bottom:1px solid #202938;
+}
 
-    .logout {
-      background: #252a34;
-      border: 0;
-      color: white;
-      padding: 9px 13px;
-      border-radius: 10px;
-      cursor: pointer;
-    }
+.userList{
+  flex:1;
+  overflow-y:auto;
+}
 
-    .content {
-      flex: 1;
-      display: flex;
-      overflow: hidden;
-    }
+.userItem{
+  padding:15px 18px;
+  border-bottom:1px solid #171f2c;
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
 
-    .sidebar {
-      width: 320px;
-      border-right: 1px solid #292d36;
-      background: #13161c;
-      padding: 15px;
-      overflow-y: auto;
-    }
+.userItem:hover{
+  background:#151d2a;
+}
 
-    .sidebar h2 {
-      font-size: 18px;
-      margin-bottom: 15px;
-    }
+.avatar{
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  background:#248cff;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-weight:bold;
+  flex-shrink:0;
+}
 
-    .search-box {
-      width: 100%;
-      padding: 12px;
-      border-radius: 10px;
-      border: 1px solid #343945;
-      background: #0e1015;
-      color: white;
-      margin-bottom: 12px;
-    }
+.userInfo{
+  min-width:0;
+}
 
-    .user-card {
-      padding: 13px;
-      background: #1b1f27;
-      border-radius: 12px;
-      margin-bottom: 8px;
-      cursor: pointer;
-    }
+.userInfo strong{
+  display:block;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
 
-    .user-card:hover {
-      background: #252b36;
-    }
+.userInfo small{
+  color:#7d899b;
+}
 
-    .user-name {
-      font-weight: bold;
-    }
+.sideBottom{
+  padding:15px;
+  border-top:1px solid #202938;
+}
 
-    .user-email {
-      color: #9299a6;
-      font-size: 12px;
-      margin-top: 4px;
-    }
+.logout{
+  width:100%;
+  background:#171e2a;
+  border:1px solid #303b4e;
+  color:#fff;
+  padding:12px;
+  border-radius:10px;
+}
 
-    .chat-area {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      min-width: 0;
-    }
+/* CHAT */
+.chat{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  min-width:0;
+}
 
-    .chat-header {
-      height: 65px;
-      display: flex;
-      align-items: center;
-      padding: 0 18px;
-      background: #181b22;
-      border-bottom: 1px solid #292d36;
-    }
+.chatHeader{
+  height:70px;
+  padding:12px 18px;
+  border-bottom:1px solid #202938;
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
 
-    .chat-header-name {
-      font-weight: bold;
-    }
+.chatHeaderInfo{
+  min-width:0;
+}
 
-    .messages {
-      flex: 1;
-      overflow-y: auto;
-      padding: 18px;
-    }
+.chatHeaderInfo strong{
+  display:block;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
 
-    .empty-chat {
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #777f8c;
-      text-align: center;
-    }
+.chatHeaderInfo small{
+  color:#7e899a;
+}
 
-    .bubble {
-      max-width: 75%;
-      padding: 10px 13px;
-      margin-bottom: 9px;
-      border-radius: 15px;
-      line-height: 1.4;
-      word-wrap: break-word;
-    }
+.messages{
+  flex:1;
+  overflow-y:auto;
+  padding:20px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
 
-    .mine {
-      margin-left: auto;
-      background: #3478f6;
-      border-bottom-right-radius: 4px;
-    }
+.empty{
+  margin:auto;
+  color:#6f7b8d;
+  text-align:center;
+  padding:30px;
+}
 
-    .theirs {
-      margin-right: auto;
-      background: #272c35;
-      border-bottom-left-radius: 4px;
-    }
+.message{
+  max-width:75%;
+  padding:10px 13px;
+  border-radius:16px;
+  line-height:1.4;
+  word-break:break-word;
+}
 
-    .composer {
-      display: flex;
-      gap: 8px;
-      padding: 12px;
-      background: #181b22;
-      border-top: 1px solid #292d36;
-    }
+.message.mine{
+  align-self:flex-end;
+  background:#1976e8;
+  border-bottom-right-radius:4px;
+}
 
-    .composer input {
-      flex: 1;
-      min-width: 0;
-      padding: 13px;
-      border-radius: 12px;
-      border: 1px solid #343945;
-      background: #0e1015;
-      color: white;
-      outline: none;
-    }
+.message.theirs{
+  align-self:flex-start;
+  background:#192231;
+  border-bottom-left-radius:4px;
+}
 
-    .send-btn {
-      width: 55px;
-      border: 0;
-      border-radius: 12px;
-      background: #3478f6;
-      color: white;
-      font-size: 20px;
-      cursor: pointer;
-    }
+.messageTime{
+  display:block;
+  font-size:10px;
+  opacity:.65;
+  margin-top:5px;
+}
 
-    .loading {
-      text-align: center;
-      color: #9da3ae;
-      padding: 20px;
-    }
+.photo{
+  max-width:260px;
+  width:100%;
+  border-radius:12px;
+  display:block;
+  cursor:pointer;
+}
 
-    @media (max-width: 700px) {
-      .sidebar {
-        width: 100%;
-      }
+.composer{
+  padding:12px;
+  border-top:1px solid #202938;
+  display:flex;
+  gap:8px;
+  align-items:center;
+  background:#0d121b;
+}
 
-      .chat-area {
-        display: none;
-      }
+.messageInput{
+  flex:1;
+  background:#151d29;
+  border:1px solid #2b374a;
+  color:#fff;
+  padding:13px;
+  border-radius:14px;
+  outline:none;
+}
 
-      .content.chat-open .sidebar {
-        display: none;
-      }
+.iconButton{
+  width:46px;
+  height:46px;
+  border:0;
+  border-radius:13px;
+  background:#192333;
+  color:#fff;
+  font-size:21px;
+}
 
-      .content.chat-open .chat-area {
-        display: flex;
-      }
+.sendButton{
+  width:52px;
+  height:46px;
+  border:0;
+  border-radius:13px;
+  background:#248cff;
+  color:#fff;
+  font-size:20px;
+}
 
-      .chat-header::before {
-        content: "‹";
-        font-size: 32px;
-        margin-right: 15px;
-        cursor: pointer;
-      }
-    }
-  </style>
+#photoInput{
+  display:none;
+}
+
+.mobileBack{
+  display:none;
+}
+
+/* LOADING */
+.loading{
+  padding:20px;
+  color:#7e899a;
+  text-align:center;
+}
+
+@media(max-width:700px){
+  .sidebar{
+    width:100%;
+    border-right:0;
+  }
+
+  .chat{
+    display:none;
+  }
+
+  #appScreen.chatOpen .sidebar{
+    display:none;
+  }
+
+  #appScreen.chatOpen .chat{
+    display:flex;
+  }
+
+  .mobileBack{
+    display:block;
+    border:0;
+    background:transparent;
+    color:#fff;
+    font-size:25px;
+    padding:5px;
+  }
+
+  .message{
+    max-width:84%;
+  }
+}
+</style>
 </head>
 
 <body>
 
-  <!-- LOGIN / SIGNUP -->
-  <section id="authScreen" class="screen">
-    <div class="auth-box">
+<!-- LOGIN / SIGNUP -->
+<section id="authScreen">
+  <div class="authBox">
 
-      <div class="logo">💬</div>
+    <div class="logo">🔒 Private Chat</div>
+    <div class="subtitle">Secure 1-to-1 chatting</div>
 
-      <h1>Private Chat</h1>
+    <div id="loginArea">
+      <h2>Login</h2>
 
-      <p class="subtitle">
-        Secure one-to-one messaging
-      </p>
+      <input
+        id="loginEmail"
+        class="input"
+        type="email"
+        placeholder="Email"
+        autocomplete="email"
+      >
 
-      <div class="field">
-        <label>Email</label>
-        <input id="email" type="email" placeholder="Enter your email">
-      </div>
+      <input
+        id="loginPassword"
+        class="input"
+        type="password"
+        placeholder="Password"
+        autocomplete="current-password"
+      >
 
-      <div class="field">
-        <label>Password</label>
-        <input id="password" type="password" placeholder="Enter password">
-      </div>
-
-      <button id="loginBtn" class="primary-btn">
+      <button id="loginBtn" class="primary">
         Login
       </button>
 
-      <button id="signupBtn" class="secondary-btn">
-        Create Account
+      <button id="showSignupBtn" class="secondary">
+        Create new account
+      </button>
+    </div>
+
+    <div id="signupArea" class="hidden">
+      <h2>Create account</h2>
+
+      <input
+        id="signupEmail"
+        class="input"
+        type="email"
+        placeholder="Email"
+        autocomplete="email"
+      >
+
+      <input
+        id="signupPassword"
+        class="input"
+        type="password"
+        placeholder="Password (minimum 6 characters)"
+        autocomplete="new-password"
+      >
+
+      <button id="signupBtn" class="primary">
+        Sign Up
       </button>
 
-      <div id="authMessage" class="message"></div>
-
+      <button id="showLoginBtn" class="secondary">
+        Back to Login
+      </button>
     </div>
-  </section>
+
+    <div id="authMessage" class="authMessage"></div>
+
+  </div>
+</section>
 
 
-  <!-- MAIN APP -->
-  <section id="appScreen" class="screen hidden">
+<!-- MAIN APP -->
+<section id="appScreen" class="hidden">
 
-    <header class="topbar">
-      <div class="topbar-title">
-        💬 Private Chat
+  <aside class="sidebar">
+
+    <div class="sideHeader">
+      <h1>💬 Private Chat</h1>
+      <div id="currentEmail" class="userEmail"></div>
+    </div>
+
+    <div class="searchBox">
+      <input
+        id="searchInput"
+        class="input"
+        style="margin:0"
+        type="text"
+        placeholder="Search users..."
+      >
+    </div>
+
+    <div id="userList" class="userList">
+      <div class="loading">Loading users...</div>
+    </div>
+
+    <div class="sideBottom">
+      <button id="logoutBtn" class="logout">
+        🚪 Logout
+      </button>
+    </div>
+
+  </aside>
+
+
+  <main class="chat">
+
+    <header class="chatHeader">
+
+      <button id="backBtn" class="mobileBack">
+        ‹
+      </button>
+
+      <div id="chatAvatar" class="avatar">
+        ?
       </div>
 
-      <button id="logoutBtn" class="logout">
-        Logout
-      </button>
+      <div class="chatHeaderInfo">
+        <strong id="chatUserName">Select a user</strong>
+        <small id="chatUserStatus">
+          Private conversation
+        </small>
+      </div>
+
     </header>
 
-    <main id="mainContent" class="content">
 
-      <!-- USERS -->
-      <aside class="sidebar">
+    <div id="messages" class="messages">
+      <div class="empty">
+        👋<br><br>
+        Select someone from the list<br>
+        to start a private chat.
+      </div>
+    </div>
 
-        <h2>People</h2>
 
-        <input
-          id="userSearch"
-          class="search-box"
-          type="text"
-          placeholder="Search users..."
-        >
+    <div class="composer">
 
-        <div id="usersList">
-          <div class="loading">
-            Loading users...
-          </div>
-        </div>
+      <input
+        id="photoInput"
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+      >
 
-      </aside>
+      <button id="photoBtn" class="iconButton" title="Send photo">
+        📷
+      </button>
 
+      <input
+        id="messageInput"
+        class="messageInput"
+        type="text"
+        placeholder="Type a message..."
+        autocomplete="off"
+      >
 
-      <!-- CHAT -->
-      <section class="chat-area">
+      <button id="sendBtn" class="sendButton">
+        ➤
+      </button>
 
-        <header class="chat-header">
-          <div id="chatHeaderName" class="chat-header-name">
-            Select a person to chat
-          </div>
-        </header>
+    </div>
 
-        <div id="messages" class="messages">
+  </main>
 
-          <div class="empty-chat">
-            Select a person from the list to start a private chat.
-          </div>
+</section>
 
-        </div>
 
-        <div class="composer">
+<script>
+/* ==============================
+   SUPABASE CONFIG
+============================== */
 
-          <input
-            id="messageInput"
-            type="text"
-            placeholder="Type a message..."
-            autocomplete="off"
-          >
+const SUPABASE_URL =
+  "https://zbwpgegzhfewucacpfc.supabase.co";
 
-          <button id="sendBtn" class="send-btn">
-            ➤
-          </button>
+const SUPABASE_KEY =
+  "sb_publishable_0CsxNclnpApy0WM0ajFMpA_nqfSu18A";
 
-        </div>
+const supabaseClient =
+  window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
 
-      </section>
 
-    </main>
+/* ==============================
+   GLOBAL VARIABLES
+============================== */
 
-  </section>
+let currentUser = null;
+let selectedUser = null;
+let currentConversation = null;
+let messageChannel = null;
+let allUsers = [];
 
 
-  <!-- FIREBASE -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+/* ==============================
+   ELEMENTS
+============================== */
 
+const authScreen =
+  document.getElementById("authScreen");
 
-  <script>
+const appScreen =
+  document.getElementById("appScreen");
 
-    /* =====================================================
-       FIREBASE CONFIG
-       YAHAN APNE FIREBASE WEB APP KA CONFIG PASTE KARNA HAI
-       ===================================================== */
+const loginArea =
+  document.getElementById("loginArea");
 
-    const firebaseConfig = {
-  apiKey: "AIzaSyDY9epmAiJAnD5JWDA6tTScUtF4BmrXz0k",
-  authDomain: "nitin-private-chat-limited.firebaseapp.com",
-  projectId: "nitin-private-chat-limited",
-  storageBucket: "nitin-private-chat-limited.firebasestorage.app",
-  messagingSenderId: "889691355692",
-  appId: "1:889691355692:web:1cc622233533ae464daf89",
-  measurementId: "G-PN94G40DQN"
-};
+const signupArea =
+  document.getElementById("signupArea");
 
-    firebase.initializeApp(firebaseConfig);
+const authMessage =
+  document.getElementById("authMessage");
 
-    const auth = firebase.auth();
+const userList =
+  document.getElementById("userList");
 
-    const db = firebase.firestore();
+const messages =
+  document.getElementById("messages");
 
+const messageInput =
+  document.getElementById("messageInput");
 
-    /* =====================================================
-       VARIABLES
-       ===================================================== */
+const photoInput =
+  document.getElementById("photoInput");
 
-    let currentUser = null;
 
-    let selectedUser = null;
+/* ==============================
+   AUTH UI
+============================== */
 
-    let selectedConversationId = null;
+document
+  .getElementById("showSignupBtn")
+  .addEventListener("click", () => {
 
-    let unsubscribeMessages = null;
+    loginArea.classList.add("hidden");
+    signupArea.classList.remove("hidden");
+    authMessage.textContent = "";
 
+  });
 
-    /* =====================================================
-       ELEMENTS
-       ===================================================== */
 
-    const authScreen =
-      document.getElementById("authScreen");
+document
+  .getElementById("showLoginBtn")
+  .addEventListener("click", () => {
 
-    const appScreen =
-      document.getElementById("appScreen");
+    signupArea.classList.add("hidden");
+    loginArea.classList.remove("hidden");
+    authMessage.textContent = "";
 
-    const emailInput =
-      document.getElementById("email");
+  });
 
-    const passwordInput =
-      document.getElementById("password");
 
-    const loginBtn =
-      document.getElementById("loginBtn");
+/* ==============================
+   SIGN UP
+============================== */
 
-    const signupBtn =
-      document.getElementById("signupBtn");
+document
+  .getElementById("signupBtn")
+  .addEventListener("click", async () => {
 
-    const logoutBtn =
-      document.getElementById("logoutBtn");
+    const email =
+      document.getElementById("signupEmail")
+        .value.trim();
 
-    const authMessage =
-      document.getElementById("authMessage");
+    const password =
+      document.getElementById("signupPassword")
+        .value;
 
-    const usersList =
-      document.getElementById("usersList");
-
-    const userSearch =
-      document.getElementById("userSearch");
-
-    const chatHeaderName =
-      document.getElementById("chatHeaderName");
-
-    const messages =
-      document.getElementById("messages");
-
-    const messageInput =
-      document.getElementById("messageInput");
-
-    const sendBtn =
-      document.getElementById("sendBtn");
-
-    const mainContent =
-      document.getElementById("mainContent");
-
-
-    /* =====================================================
-       AUTH
-       ===================================================== */
-
-    signupBtn.addEventListener("click", async () => {
-
-      const email = emailInput.value.trim();
-
-      const password = passwordInput.value;
-
-      authMessage.textContent = "";
-
-      if (!email || !password) {
-
-        authMessage.textContent =
-          "Email aur password enter karo.";
-
-        return;
-      }
-
-      if (password.length < 6) {
-
-        authMessage.textContent =
-          "Password kam se kam 6 characters ka hona chahiye.";
-
-        return;
-      }
-
-      try {
-
-        const result =
-          await auth.createUserWithEmailAndPassword(
-            email,
-            password
-          );
-
-        const user = result.user;
-
-        await db
-          .collection("users")
-          .doc(user.uid)
-          .set({
-            uid: user.uid,
-            email: user.email,
-            createdAt:
-              firebase.firestore.FieldValue.serverTimestamp()
-          });
-
-        authMessage.style.color = "#7dff9c";
-
-        authMessage.textContent =
-          "Account successfully created!";
-
-      } catch (error) {
-
-        authMessage.style.color = "#ff8f8f";
-
-        authMessage.textContent =
-          error.message;
-      }
-
-    });
-
-
-    loginBtn.addEventListener("click", async () => {
-
-      const email = emailInput.value.trim();
-
-      const password = passwordInput.value;
-
-      authMessage.textContent = "";
-
-      try {
-
-        await auth.signInWithEmailAndPassword(
-          email,
-          password
-        );
-
-      } catch (error) {
-
-        authMessage.textContent =
-          error.message;
-      }
-
-    });
-
-
-    logoutBtn.addEventListener("click", async () => {
-
-      await auth.signOut();
-
-    });
-
-
-    /* =====================================================
-       AUTH STATE
-       ===================================================== */
-
-    auth.onAuthStateChanged(async (user) => {
-
-      if (user) {
-
-        currentUser = user;
-
-        authScreen.classList.add("hidden");
-
-        appScreen.classList.remove("hidden");
-
-        await createMissingProfile();
-
-        loadUsers();
-
-      } else {
-
-        currentUser = null;
-
-        authScreen.classList.remove("hidden");
-
-        appScreen.classList.add("hidden");
-
-        if (unsubscribeMessages) {
-
-          unsubscribeMessages();
-
-          unsubscribeMessages = null;
-        }
-
-      }
-
-    });
-
-
-    /* =====================================================
-       CREATE PROFILE IF MISSING
-       ===================================================== */
-
-    async function createMissingProfile() {
-
-      const ref =
-        db.collection("users")
-          .doc(currentUser.uid);
-
-      const snap = await ref.get();
-
-      if (!snap.exists) {
-
-        await ref.set({
-
-          uid: currentUser.uid,
-
-          email: currentUser.email,
-
-          createdAt:
-            firebase.firestore.FieldValue.serverTimestamp()
-
-        });
-
-      }
-
+    if (!email || !password) {
+      authMessage.textContent =
+        "Please enter email and password.";
+      return;
     }
 
-
-    /* =====================================================
-       LOAD USERS
-       ===================================================== */
-
-    let allUsers = [];
-
-    async function loadUsers() {
-
-      usersList.innerHTML =
-        '<div class="loading">Loading users...</div>';
-
-      try {
-
-        const snapshot =
-          await db.collection("users").get();
-
-        allUsers = [];
-
-        snapshot.forEach(doc => {
-
-          const data = doc.data();
-
-          if (data.uid !== currentUser.uid) {
-
-            allUsers.push(data);
-
-          }
-
-        });
-
-        renderUsers(allUsers);
-
-      } catch (error) {
-
-        usersList.innerHTML =
-          '<div class="loading">Users load nahi ho paaye.</div>';
-
-        console.error(error);
-
-      }
-
+    if (password.length < 6) {
+      authMessage.textContent =
+        "Password must be at least 6 characters.";
+      return;
     }
 
+    authMessage.textContent =
+      "Creating account...";
 
-    function renderUsers(users) {
-
-      usersList.innerHTML = "";
-
-      if (users.length === 0) {
-
-        usersList.innerHTML =
-          '<div class="loading">Abhi koi aur user nahi hai.</div>';
-
-        return;
-      }
-
-      users.forEach(user => {
-
-        const card =
-          document.createElement("div");
-
-        card.className = "user-card";
-
-        card.innerHTML = `
-
-          <div class="user-name">
-            👤 ${escapeHtml(user.email || "User")}
-          </div>
-
-          <div class="user-email">
-            Tap to start private chat
-          </div>
-
-        `;
-
-        card.addEventListener("click", () => {
-
-          openChat(user);
-
-        });
-
-        usersList.appendChild(card);
-
+    const { data, error } =
+      await supabaseClient.auth.signUp({
+        email,
+        password
       });
 
+    if (error) {
+      authMessage.textContent =
+        error.message;
+      return;
     }
 
-
-    /* =====================================================
-       USER SEARCH
-       ===================================================== */
-
-    userSearch.addEventListener("input", () => {
-
-      const text =
-        userSearch.value
-          .toLowerCase()
-          .trim();
-
-      const filtered =
-        allUsers.filter(user =>
-          (user.email || "")
-            .toLowerCase()
-            .includes(text)
-        );
-
-      renderUsers(filtered);
-
-    });
-
-
-    /* =====================================================
-       CONVERSATION ID
-       ===================================================== */
-
-    function getConversationId(uid1, uid2) {
-
-      return [uid1, uid2]
-        .sort()
-        .join("_");
-
+    if (data.session) {
+      authMessage.textContent =
+        "Account created successfully.";
+    } else {
+      authMessage.textContent =
+        "Account created! Check your email and confirm your account, then login.";
     }
 
+  });
 
-    /* =====================================================
-       OPEN CHAT
-       ===================================================== */
 
-    async function openChat(user) {
+/* ==============================
+   LOGIN
+============================== */
 
-      selectedUser = user;
+document
+  .getElementById("loginBtn")
+  .addEventListener("click", async () => {
 
-      selectedConversationId =
-        getConversationId(
-          currentUser.uid,
-          user.uid
-        );
+    const email =
+      document.getElementById("loginEmail")
+        .value.trim();
 
-      chatHeaderName.textContent =
-        user.email || "User";
+    const password =
+      document.getElementById("loginPassword")
+        .value;
 
-      mainContent.classList.add("chat-open");
-
-      messages.innerHTML =
-        '<div class="loading">Loading messages...</div>';
-
-      await createConversation();
-
-      listenForMessages();
-
+    if (!email || !password) {
+      authMessage.textContent =
+        "Please enter email and password.";
+      return;
     }
 
+    authMessage.textContent =
+      "Logging in...";
 
-    /* =====================================================
-       CREATE CONVERSATION
-       ===================================================== */
+    const { error } =
+      await supabaseClient.auth.signInWithPassword({
+        email,
+        password
+      });
 
-    async function createConversation() {
-
-      const ref =
-        db.collection("conversations")
-          .doc(selectedConversationId);
-
-      const snap = await ref.get();
-
-      if (!snap.exists) {
-
-        await ref.set({
-
-          participants: [
-            currentUser.uid,
-            selectedUser.uid
-          ],
-
-          createdAt:
-            firebase.firestore.FieldValue.serverTimestamp()
-
-        });
-
-      }
-
+    if (error) {
+      authMessage.textContent =
+        error.message;
+      return;
     }
 
+    authMessage.textContent = "";
 
-    /* =====================================================
-       REAL-TIME MESSAGES
-       ===================================================== */
+  });
 
-    function listenForMessages() {
 
-      if (unsubscribeMessages) {
+/* ==============================
+   LOGOUT
+============================== */
 
-        unsubscribeMessages();
+document
+  .getElementById("logoutBtn")
+  .addEventListener("click", async () => {
 
-      }
+    if (messageChannel) {
+      await supabaseClient
+        .removeChannel(messageChannel);
 
-      unsubscribeMessages =
-        db
-          .collection("conversations")
-          .doc(selectedConversationId)
-          .collection("messages")
-          .orderBy("createdAt", "asc")
-          .onSnapshot(snapshot => {
+      messageChannel = null;
+    }
 
-            messages.innerHTML = "";
+    await supabaseClient.auth.signOut();
 
-            if (snapshot.empty) {
+  });
 
-              messages.innerHTML = `
-                <div class="empty-chat">
-                  No messages yet.<br>
-                  Send your first message.
-                </div>
-              `;
 
-              return;
-            }
+/* ==============================
+   AUTH STATE
+============================== */
 
-            snapshot.forEach(doc => {
+supabaseClient.auth.onAuthStateChange(
+  async (event, session) => {
 
-              const data = doc.data();
+    if (session && session.user) {
 
-              const bubble =
-                document.createElement("div");
+      currentUser = session.user;
 
-              bubble.className =
-                "bubble " +
-                (
-                  data.senderId === currentUser.uid
-                    ? "mine"
-                    : "theirs"
-                );
+      authScreen.classList.add("hidden");
+      appScreen.classList.remove("hidden");
 
-              bubble.textContent =
-                data.text || "";
+      document.getElementById("currentEmail")
+        .textContent = currentUser.email || "";
 
-              messages.appendChild(bubble);
+      await loadUsers();
 
-            });
+    } else {
 
-            messages.scrollTop =
-              messages.scrollHeight;
+      currentUser = null;
+      selectedUser = null;
+      currentConversation = null;
 
-          }, error => {
-
-            console.error(error);
-
-            messages.innerHTML = `
-              <div class="empty-chat">
-                Messages load nahi ho paaye.
-              </div>
-            `;
-
-          });
+      authScreen.classList.remove("hidden");
+      appScreen.classList.add("hidden");
 
     }
 
-
-    /* =====================================================
-       SEND MESSAGE
-       ===================================================== */
-
-    async function sendMessage() {
-
-      const text =
-        messageInput.value.trim();
-
-      if (!text) return;
-
-      if (!currentUser || !selectedUser) {
-
-        alert("Pehle kisi user ko select karo.");
-
-        return;
-      }
-
-      messageInput.value = "";
-
-      try {
-
-        await db
-          .collection("conversations")
-          .doc(selectedConversationId)
-          .collection("messages")
-          .add({
-
-            senderId: currentUser.uid,
-
-            text: text,
-
-            createdAt:
-              firebase.firestore.FieldValue.serverTimestamp()
-
-          });
-
-      } catch (error) {
-
-        console.error(error);
-
-        alert(
-          "Message send nahi hua: " +
-          error.message
-        );
-
-        messageInput.value = text;
-
-      }
-
-    }
+  }
+);
 
 
-    sendBtn.addEventListener(
+/* ==============================
+   LOAD USERS
+============================== */
+
+async function loadUsers() {
+
+  userList.innerHTML =
+    '<div class="loading">Loading users...</div>';
+
+  const { data, error } =
+    await supabaseClient
+      .from("profiles")
+      .select("id,email,created_at")
+      .neq("id", currentUser.id)
+      .order("created_at", { ascending:true });
+
+  if (error) {
+
+    userList.innerHTML =
+      '<div class="loading">Unable to load users.</div>';
+
+    console.error(error);
+    return;
+  }
+
+  allUsers = data || [];
+
+  renderUsers(allUsers);
+}
+
+
+/* ==============================
+   RENDER USERS
+============================== */
+
+function renderUsers(users) {
+
+  if (!users.length) {
+
+    userList.innerHTML =
+      '<div class="loading">No other users yet.</div>';
+
+    return;
+  }
+
+  userList.innerHTML = "";
+
+  users.forEach(user => {
+
+    const item =
+      document.createElement("div");
+
+    item.className = "userItem";
+
+    const avatar =
+      document.createElement("div");
+
+    avatar.className = "avatar";
+
+    avatar.textContent =
+      (user.email || "?")
+        .charAt(0)
+        .toUpperCase();
+
+    const info =
+      document.createElement("div");
+
+    info.className = "userInfo";
+
+    const name =
+      document.createElement("strong");
+
+    name.textContent =
+      user.email || "User";
+
+    const status =
+      document.createElement("small");
+
+    status.textContent =
+      "Tap to chat";
+
+    info.appendChild(name);
+    info.appendChild(status);
+
+    item.appendChild(avatar);
+    item.appendChild(info);
+
+    item.addEventListener(
       "click",
-      sendMessage
+      () => openChat(user)
     );
 
+    userList.appendChild(item);
 
-    messageInput.addEventListener(
-      "keydown",
-      event => {
+  });
+}
 
-        if (event.key === "Enter") {
 
-          event.preventDefault();
+/* ==============================
+   SEARCH
+============================== */
 
-          sendMessage();
+document
+  .getElementById("searchInput")
+  .addEventListener("input", event => {
+
+    const query =
+      event.target.value
+        .trim()
+        .toLowerCase();
+
+    if (!query) {
+      renderUsers(allUsers);
+      return;
+    }
+
+    const filtered =
+      allUsers.filter(user =>
+        (user.email || "")
+          .toLowerCase()
+          .includes(query)
+      );
+
+    renderUsers(filtered);
+
+  });
+
+
+/* ==============================
+   OPEN CHAT
+============================== */
+
+async function openChat(user) {
+
+  selectedUser = user;
+
+  appScreen.classList.add("chatOpen");
+
+  document.getElementById("chatUserName")
+    .textContent = user.email || "User";
+
+  document.getElementById("chatAvatar")
+    .textContent =
+      (user.email || "?")
+        .charAt(0)
+        .toUpperCase();
+
+  messages.innerHTML =
+    '<div class="loading">Opening chat...</div>';
+
+  currentConversation =
+    await getOrCreateConversation(
+      currentUser.id,
+      selectedUser.id
+    );
+
+  if (!currentConversation) {
+    messages.innerHTML =
+      '<div class="empty">Could not open conversation.</div>';
+    return;
+  }
+
+  await loadMessages();
+
+  subscribeToMessages();
+
+}
+
+
+/* ==============================
+   CONVERSATION
+============================== */
+
+async function getOrCreateConversation(
+  uidA,
+  uidB
+) {
+
+  const ids =
+    [uidA, uidB].sort();
+
+  const user1 = ids[0];
+  const user2 = ids[1];
+
+  let { data, error } =
+    await supabaseClient
+      .from("conversations")
+      .select("*")
+      .eq("user1", user1)
+      .eq("user2", user2)
+      .maybeSingle();
+
+  if (error) {
+
+    console.error(error);
+    return null;
+
+  }
+
+  if (data) {
+    return data;
+  }
+
+  const result =
+    await supabaseClient
+      .from("conversations")
+      .insert({
+        user1,
+        user2
+      })
+      .select()
+      .single();
+
+  if (result.error) {
+
+    /* Another request may have created it */
+    const retry =
+      await supabaseClient
+        .from("conversations")
+        .select("*")
+        .eq("user1", user1)
+        .eq("user2", user2)
+        .maybeSingle();
+
+    if (retry.data) {
+      return retry.data;
+    }
+
+    console.error(result.error);
+    return null;
+  }
+
+  return result.data;
+}
+
+
+/* ==============================
+   LOAD MESSAGES
+============================== */
+
+async function loadMessages() {
+
+  if (!currentConversation) return;
+
+  const { data, error } =
+    await supabaseClient
+      .from("messages")
+      .select("*")
+      .eq(
+        "conversation_id",
+        currentConversation.id
+      )
+      .order("created_at", {
+        ascending:true
+      });
+
+  if (error) {
+
+    console.error(error);
+
+    messages.innerHTML =
+      '<div class="empty">Unable to load messages.</div>';
+
+    return;
+  }
+
+  messages.innerHTML = "";
+
+  if (!data || !data.length) {
+
+    messages.innerHTML =
+      '<div class="empty">No messages yet.<br>Say hello 👋</div>';
+
+    return;
+  }
+
+  for (const msg of data) {
+    await renderMessage(msg);
+  }
+
+  scrollMessages();
+
+}
+
+
+/* ==============================
+   RENDER MESSAGE
+============================== */
+
+async function renderMessage(msg) {
+
+  const wrapper =
+    document.createElement("div");
+
+  wrapper.className =
+    "message " +
+    (msg.sender_id === currentUser.id
+      ? "mine"
+      : "theirs");
+
+  if (msg.text) {
+
+    const text =
+      document.createElement("div");
+
+    text.textContent = msg.text;
+
+    wrapper.appendChild(text);
+
+  }
+
+  if (msg.photo_path) {
+
+    const img =
+      document.createElement("img");
+
+    img.className = "photo";
+    img.alt = "Private photo";
+    img.loading = "lazy";
+
+    const { data, error } =
+      await supabaseClient
+        .storage
+        .from("chat-photos")
+        .createSignedUrl(
+          msg.photo_path,
+          3600
+        );
+
+    if (!error && data && data.signedUrl) {
+
+      img.src = data.signedUrl;
+
+      img.addEventListener(
+        "click",
+        () => {
+          window.open(
+            data.signedUrl,
+            "_blank"
+          );
+        }
+      );
+
+      wrapper.appendChild(img);
+
+    }
+
+  }
+
+  const time =
+    document.createElement("span");
+
+  time.className = "messageTime";
+
+  time.textContent =
+    formatTime(msg.created_at);
+
+  wrapper.appendChild(time);
+
+  messages.appendChild(wrapper);
+}
+
+
+/* ==============================
+   REALTIME
+============================== */
+
+function subscribeToMessages() {
+
+  if (!currentConversation) return;
+
+  if (messageChannel) {
+
+    supabaseClient
+      .removeChannel(messageChannel);
+
+    messageChannel = null;
+  }
+
+  messageChannel =
+    supabaseClient
+      .channel(
+        "messages-" +
+        currentConversation.id
+      )
+      .on(
+        "postgres_changes",
+        {
+          event:"INSERT",
+          schema:"public",
+          table:"messages",
+          filter:
+            "conversation_id=eq." +
+            currentConversation.id
+        },
+        async payload => {
+
+          const oldEmpty =
+            messages.querySelector(".empty");
+
+          if (oldEmpty) {
+            oldEmpty.remove();
+          }
+
+          await renderMessage(
+            payload.new
+          );
+
+          scrollMessages();
 
         }
+      )
+      .subscribe();
 
-      }
-    );
+}
 
 
-    /* =====================================================
-       HTML ESCAPE
-       ===================================================== */
+/* ==============================
+   SEND TEXT
+============================== */
 
-    function escapeHtml(value) {
+async function sendMessage() {
 
-      return String(value)
+  if (!currentUser ||
+      !selectedUser ||
+      !currentConversation) {
 
-        .replaceAll("&", "&amp;")
+    return;
+  }
 
-        .replaceAll("<", "&lt;")
+  const text =
+    messageInput.value.trim();
 
-        .replaceAll(">", "&gt;")
+  if (!text) return;
 
-        .replaceAll('"', "&quot;")
-
-        .replaceAll("'", "&#039;");
-
-    }
-
-  </script>
-
-</body>
-        </html>
+  messageInput.disabled = true

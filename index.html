@@ -1384,28 +1384,7 @@ function formatTime(value) {
   }
 })();
 
-    if (upload.error) throw upload.error;
-
-    const insert =
-      await supabaseClient
-        .from("messages")
-        .insert({
-          conversation_id: currentConversation.id,
-          sender_id: currentUser.id,
-          photo_path: path
-        });
-
-    if (insert.error) throw insert.error;
-
-  } catch (error) {
-    console.error(error);
-    alert("Photo upload failed: " + error.message);
-  }
-
-  button.disabled = false;
-  button.textContent = "📷";
-  photoInput.value = "";
-});
+    
 </script>
 </body>
 </html>
